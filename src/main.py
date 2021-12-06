@@ -9,7 +9,7 @@ def main() -> None:
     server = Server((hostname, 50019))
     server.connect()
 
-    clipboard.listen(server)
+    clipboard.listen(server.update_clipboard, server.disconnect)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,7 @@
 import socket
 import threading
+import time
+import os
 from typing import Tuple
 
 from clipboard import update_clipboard
@@ -19,6 +21,8 @@ def recvall(sock: socket.socket) -> bytes:
 
 class Server:
 
+    DELAY_SCAN = 0.1
+
     def __init__(self, address: Tuple[str, int]) -> None:
         self.address = address
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -32,11 +36,31 @@ class Server:
         listener.start()
 
 
+    def disconnect(self) -> None:
+        self.socket.close()
+        self.connected = False
+        os._exit(0)
+
+
     def listen(self) -> None:
-        while self.connected:
-            clip = recvall(self.socket)
-            if clip:
-                update_clipboard(clip.decode('utf-8'))
+        try:
+            while self.connected:
+                clip = recvall(self.socket)
+                if clip:
+                    update_clipboard(clip.decode('utf-8'))
+                
+                time.sleep(self.DELAY_SCAN)
+        
+        except ConnectionResetError:
+            print('Connection reset by peer')
+        except ConnectionAbortedError:
+            print('Connection aborted')
+        except BrokenPipeError:
+            print('Broken pipe')
+
+        finally:
+            self.disconnect()
+            print('Connection closed')
     
 
     def update_clipboard(self, clip: str) -> None:
