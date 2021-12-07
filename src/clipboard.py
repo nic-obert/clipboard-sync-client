@@ -15,7 +15,7 @@ def listen(callback: Callable[[str], None], exit_callback: Callable[[], None]) -
             if clip != new_clip:
                 clip = new_clip
                 callback(clip)
-                print(clip)
+                #print(clip)
 
             time.sleep(0.1)
     
